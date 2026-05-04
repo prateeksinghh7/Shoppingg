@@ -8,13 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
   font-family:'Poppins',sans-serif;
-  scroll-behavior:smooth;
 }
 
 body{
@@ -106,11 +104,6 @@ nav{
   transform:translateX(30px);
 }
 
-.toggle-label{
-  font-size:12px;
-  margin-top:5px;
-}
-
 /* HERO */
 .hero{
   height:80vh;
@@ -130,23 +123,40 @@ nav{
   padding:60px;
 }
 
+/* FILTER BUTTONS */
+.filter-btn{
+  padding:10px 20px;
+  margin:5px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+  background:linear-gradient(45deg,#ff7eb3,#7afcff);
+  color:white;
+  transition:0.3s;
+}
+.filter-btn:hover{
+  transform:scale(1.1);
+}
+
+/* CARDS */
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:30px;
 }
 
-/* CARD */
 .card{
   border-radius:20px;
   overflow:hidden;
   background:rgba(255,255,255,0.05);
   backdrop-filter:blur(10px);
   transition:0.4s;
+  box-shadow:0 0 10px rgba(255,255,255,0.1);
 }
 
 .card:hover{
-  transform:translateY(-10px) scale(1.03);
+  transform:translateY(-10px) scale(1.05);
+  box-shadow:0 0 25px rgba(122,252,255,0.6);
 }
 
 .card img{
@@ -159,12 +169,28 @@ nav{
   padding:10px;
 }
 
+.card p{
+  padding:0 10px;
+}
+
 .card button{
   margin:10px;
   padding:8px 15px;
   border:none;
   border-radius:20px;
   cursor:pointer;
+  background:linear-gradient(45deg,#ff7eb3,#7afcff);
+  color:white;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111;
+  padding:15px 20px;
+  border-radius:10px;
 }
 
 /* FOOTER */
@@ -173,13 +199,12 @@ footer{
   padding:40px;
 }
 
-.creator{
-  font-weight:bold;
-  background:linear-gradient(45deg,#ff7eb3,#7afcff);
-  -webkit-background-clip:text;
-  color:transparent;
+/* CHATBOT RESIZE */
+#WACContainer iframe{
+  width:320px !important;
+  height:420px !important;
+  border-radius:15px !important;
 }
-
 </style>
 </head>
 
@@ -197,7 +222,6 @@ footer{
 
   <div class="toggle-container">
     <div class="toggle-btn" onclick="toggleMode()"></div>
-    <div class="toggle-label">Dark Mode</div>
   </div>
 </nav>
 
@@ -209,31 +233,45 @@ footer{
 </section>
 
 <section class="section">
+  <div style="text-align:center;">
+    <button class="filter-btn" onclick="filterProducts('all')">All</button>
+    <button class="filter-btn" onclick="filterProducts('shoes')">Shoes</button>
+    <button class="filter-btn" onclick="filterProducts('shirts')">Shirts</button>
+    <button class="filter-btn" onclick="filterProducts('phones')">Phones</button>
+    <button class="filter-btn" onclick="filterProducts('laptops')">Laptops</button>
+  </div>
+</section>
+
+<section class="section">
   <h2>Products</h2>
 
-  <div class="cards" id="product-list">
+  <div class="cards">
 
-    <div class="card">
+    <div class="card" data-category="shoes">
       <img src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg">
-      <h3>Sneakers</h3>
+      <h3>Nike Shoes</h3>
+      <p>₹2,999</p>
       <button onclick="addToCart()">Add to Cart</button>
     </div>
 
-    <div class="card">
-      <img src="https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg">
-      <h3>Headphones</h3>
+    <div class="card" data-category="shirts">
+      <img src="https://images.pexels.com/photos/428340/pexels-photo-428340.jpeg">
+      <h3>Casual Shirt</h3>
+      <p>₹999</p>
       <button onclick="addToCart()">Add to Cart</button>
     </div>
 
-    <div class="card">
-      <img src="https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg">
-      <h3>Smart Watch</h3>
+    <div class="card" data-category="phones">
+      <img src="https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg">
+      <h3>Smartphone</h3>
+      <p>₹15,999</p>
       <button onclick="addToCart()">Add to Cart</button>
     </div>
 
-    <div class="card">
-      <img src="https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg">
-      <h3>Streetwear</h3>
+    <div class="card" data-category="laptops">
+      <img src="https://images.pexels.com/photos/18105/pexels-photo.jpg">
+      <h3>Laptop</h3>
+      <p>₹45,999</p>
       <button onclick="addToCart()">Add to Cart</button>
     </div>
 
@@ -241,10 +279,11 @@ footer{
 </section>
 
 <footer>
-  <p class="creator">✨ Made by Prateek Singh ✨</p>
+  <p>✨ Made by Prateek Singh ✨</p>
 </footer>
 
 <script>
+let count=0;
 
 /* DARK MODE */
 function toggleMode(){
@@ -252,10 +291,28 @@ function toggleMode(){
 }
 
 /* CART */
-let count=0;
 function addToCart(){
   count++;
   document.getElementById("cart-count").innerText=count;
+  showToast("Added to cart 🛒");
+}
+
+/* TOAST */
+function showToast(msg){
+  let toast=document.createElement("div");
+  toast.className="toast";
+  toast.innerText=msg;
+  document.body.appendChild(toast);
+
+  setTimeout(()=>toast.remove(),2000);
+}
+
+/* FILTER */
+function filterProducts(category){
+  let cards=document.querySelectorAll(".card");
+  cards.forEach(card=>{
+    card.style.display = (category==="all" || card.dataset.category===category) ? "block":"none";
+  });
 }
 
 /* SEARCH */
@@ -264,8 +321,7 @@ document.getElementById("search").addEventListener("keyup", function(){
   let cards=document.querySelectorAll(".card");
 
   cards.forEach(card=>{
-    let text=card.innerText.toLowerCase();
-    card.style.display=text.includes(value) ? "block" : "none";
+    card.style.display = card.innerText.toLowerCase().includes(value) ? "block":"none";
   });
 });
 
@@ -277,24 +333,23 @@ function voiceSearch(){
   }
   recognition.start();
 }
-
 </script>
 
-<!-- WATSON -->
+<!-- WATSON CHAT -->
 <script>
-  window.watsonAssistantChatOptions = {
-    integrationID: "4d4af689-f086-4552-a48e-5fc360b893c0",
-    region: "eu-de",
-    serviceInstanceID: "25aa5c73-cbb5-42b3-8a2d-585abcb66967",
-    onLoad: async (instance) => { await instance.render(); }
-  };
-  setTimeout(function(){
-    const t=document.createElement('script');
-    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" + 
-    (window.watsonAssistantChatOptions.clientVersion || 'latest') + 
-    "/WatsonAssistantChatEntry.js";
-    document.head.appendChild(t);
-  });
+window.watsonAssistantChatOptions = {
+  integrationID: "4d4af689-f086-4552-a48e-5fc360b893c0",
+  region: "eu-de",
+  serviceInstanceID: "25aa5c73-cbb5-42b3-8a2d-585abcb66967",
+  onLoad: async (instance) => { await instance.render(); }
+};
+setTimeout(function(){
+  const t=document.createElement('script');
+  t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" + 
+  (window.watsonAssistantChatOptions.clientVersion || 'latest') + 
+  "/WatsonAssistantChatEntry.js";
+  document.head.appendChild(t);
+});
 </script>
 
 </body>
